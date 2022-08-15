@@ -14,6 +14,16 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
-    return $request->user();
+Route::group(['middleware' => ['api.services', 'api.response']], function(){
+    Route::group(['prefix' => 'passport'], function () {
+        Route::post('/login', 'PassportController@login');
+        Route::post('/register', 'PassportController@register');
+    });
+});
+Route::group(['middleware' => ['api.authenticate', 'api.services', 'api.response']], function(){
+    Route::group(['prefix' => 'passport'], function () {
+        Route::get('/', 'PassportController@index');
+        Route::any('/logout', 'PassportController@logout');
+        Route::post('/password/update', 'PassportController@passwordUpdate');
+    });
 });
