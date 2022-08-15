@@ -18,4 +18,21 @@
 * configure server ` set $trace_id "${request_id}";
   add_header x-request-id $trace_id;` add request_id to the response header
 ## Usage
-*Multi language support,add language to the request header, for example:x-api-locale:zh_CN
+* Multi language support,add language to the request header, for example:x-api-locale:zh_CN
+* Register:   
+     url: hostname/api/passport/register
+     method: post  
+     parameter: email,password,password_confirm  
+     response:
+  ![](https://github.com/denghuien/laravel-restful-api/blob/main/storage/register.png)
+* Login:   
+    url: hostname/api/passport/login
+    method: post  
+    parameter: email,password  
+    response:
+    ![](https://github.com/denghuien/laravel-restful-api/blob/main/storage/login.png)
+* User info:   
+  url: hostname/api/passport
+  method: get
+  response:
+  ![](https://github.com/denghuien/laravel-restful-api/blob/main/storage/user.png)
