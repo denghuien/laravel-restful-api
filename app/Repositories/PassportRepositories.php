@@ -4,7 +4,6 @@ namespace App\Repositories;
 
 use App\Models\User;
 use App\Models\Token;
-use App\Models\Agent;
 use App\Libraries\ErrorCode;
 use App\Services\TokenServices;
 use App\Services\DeviceServices;
