@@ -23,52 +23,34 @@ if (! function_exists('setLanguage')) {
     }
 }
 
-if (! function_exists('responseEncrypt')) {
+if (! function_exists('responseFormat')) {
+
     /**
-     * @param $data
-     * @param $message
-     * @param $code
-     * @param $status
-     * @param $time
-     * @return \Illuminate\Http\Response|mixed
+     * @param array $response
+     * @param string $requestId
+     * @param int $status
+     * @param string $format
+     * @return \Illuminate\Http\JsonResponse|\Illuminate\Http\Response|mixed
      * @throws \Illuminate\Contracts\Container\BindingResolutionException
      */
-    function responseEncrypt($data, $message, $code, $status, $time)
+    function responseFormat(array $response = [], string $requestId = '', int $status = 200, string $format = 'json')
     {
+        $encrypt = config('app.encrypt');
+        $format = $encrypt ? 'text/html; charset:utf-8' : 'application/' . $format . '; charset:utf-8';
         $headers = [
-            'Content-Type' => 'text/html; charset:utf-8',
+            'Content-Type' => $format,
             'Access-Control-Allow-Origin' => '*',
-            'Access-Control-Expose-Headers' => 'Authorization',
+            'Access-Control-Expose-Headers' => 'Authorization,x-request-id',
             'Cache-Control' => 'no-cache',
         ];
-        $data = ['timestamp' => $time, 'code' => $code, 'message' => $message, 'data' => $data];
-        $data = AESEncrypt(json_encode($data, JSON_UNESCAPED_UNICODE));
+        if ($encrypt) {
+            $data = AESEncrypt(json_encode($response, JSON_UNESCAPED_UNICODE), $requestId);
+            $response = response()->make($data, $status, $headers);
+        } else {
+            $response = response()->json($response, $status, $headers,JSON_UNESCAPED_UNICODE);
+        }
 
-        return response()->make($data, $status, $headers);
-    }
-}
-
-if (! function_exists('responseFormat')) {
-    /**
-     * @param $data
-     * @param $message
-     * @param $code
-     * @param $status
-     * @param $time
-     * @param string $format
-     * @return \Illuminate\Http\JsonResponse
-     */
-    function responseFormat($data, $message, $code, $status, $time, string $format = 'json')
-    {
-        $headers = [
-            'Content-Type' => 'application/' . $format . '; charset:utf-8',
-            'Access-Control-Allow-Origin' => '*',
-            'Access-Control-Expose-Headers' => 'Authorization',
-            'Cache-Control' => 'no-cache',
-        ];
-        $data = ['timestamp' => $time, 'code' => $code, 'message' => $message, 'data' => $data];
-
-        return response()->json($data, $status, $headers,JSON_UNESCAPED_UNICODE);
+        return $response;
     }
 }
 

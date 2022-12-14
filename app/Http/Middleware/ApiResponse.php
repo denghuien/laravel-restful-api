@@ -10,6 +10,7 @@ namespace App\Http\Middleware;
 
 use Closure;
 use App\Services\AccessServices;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Auth;
 
 class ApiResponse
@@ -17,13 +18,13 @@ class ApiResponse
     /**
      * @param $request
      * @param Closure $next
-     * @return \Illuminate\Http\JsonResponse|\Illuminate\Http\Response|mixed
-     * @throws \ReflectionException
+     * @return JsonResponse|\Illuminate\Http\Response|mixed
+     * @throws \Illuminate\Contracts\Container\BindingResolutionException
      */
     public function handle($request, Closure $next)
     {
         $response = $next($request);
-        $code = 0;
+        $code = "0";
         $message = 'success';
         if ($response->getContent() === false || $response->isRedirection()) {
             return $response;
@@ -36,23 +37,18 @@ class ApiResponse
         }
         $status = $response->status();
         $time = microtime(true);
-        if ($request->route()) {
-            $auth = Auth::user();
-            $tokenId = 0;
-            $ip = getIp();
-            $method = $request->method();
-            $action = $request->route()->getAction();
-            $path = $request->path();
-            $parameter = $request->input();
-            $header = $request->header();
-            if ($auth) {
-                $token = auth('api')->getToken();
-                $tokenId = md5($token);
-            }
-            $serviceDiary = new AccessServices($method, $time, $ip, $action, $path, $parameter, $header, $tokenId, $status);
-            $serviceDiary->create();
-        }
+        $header = $request->header();
+        $requestId = $header['request-id'][0] ?? '';
+        $ip = getIp();
+        $method = $request->method();
+        $action = $request->route() ? $request->route()->getAction() : [];
+        $path = $request->path();
+        $parameter = $request->input();
+        $tokenId = Auth::user() ? md5(auth('api')->getToken()) : "0";
+        $response = ['timestamp' => $time, 'code' => (string) $code, 'message' => $message, 'data' => $data];
+        $serviceDiary = new AccessServices($method, $path, $time, $ip, $response, $action, $parameter, $header, $tokenId, $status);
+        $serviceDiary->create();
 
-        return responseFormat($data, $message, $code, $status, $time);
+        return responseFormat($response, $requestId, $status, 'json');
     }
 }

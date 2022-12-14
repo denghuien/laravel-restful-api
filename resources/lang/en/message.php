@@ -1,6 +1,6 @@
 <?php
 
-use App\Libraries\ErrorCode;
+use App\Exceptions\ErrorCode;
 
 return [
     //system

@@ -4,7 +4,7 @@ namespace App\Repositories;
 
 use App\Models\User;
 use App\Models\Token;
-use App\Libraries\ErrorCode;
+use App\Exceptions\ErrorCode;
 use App\Services\TokenServices;
 use App\Services\DeviceServices;
 use App\Exceptions\ApiException;

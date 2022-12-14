@@ -2,15 +2,13 @@
 
 namespace App\Exceptions;
 
-use App\Libraries\ErrorCode;
-
 class ApiException  extends \Exception
 {
     /**
-     * @param int $code
+     * @param string $code
      * @param string $message
      */
-    function __construct($code = 0, $message = '')
+    function __construct($code = "0", $message = '')
     {
         setLanguage();
         $code = is_int($code) ? $code : ErrorCode::SYSTEM_ERROR;
@@ -29,7 +27,8 @@ class ApiException  extends \Exception
         $class = new \ReflectionClass(ErrorCode::class);
         $constants = array_flip($class->getConstants());
         if (isset($constants[$code])) {
-            if (array_key_exists($code, trans('message'))) {
+            $error = is_array(trans('message')) ? trans('message') : [];
+            if (array_key_exists($code, $error)) {
                 $message = trans('message.' . $code);
             } else {
                 $message = $constants[$code];

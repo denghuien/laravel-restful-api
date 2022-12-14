@@ -1,12 +1,6 @@
 <?php
-/**
- * Created by PhpStorm.
- * User: Administrator
- * Date: 2019/10/15
- * Time: 16:08
- */
 
-namespace App\Libraries;
+namespace App\Exceptions;
 
 class ErrorCode
 {
