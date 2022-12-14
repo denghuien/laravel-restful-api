@@ -4,8 +4,9 @@
 
 ## Features
 * Restful api
-* Support data encryption output
-* jwt
+* Encryption output support
+* JWT
+* Multi language support
 
 ## Project install and configure
 * clone project `git clone https://github.com/denghuien/laravel-restful-api.git`
