@@ -58,10 +58,10 @@ class TokenServices
     }
 
     /**
-     * @return string
+     * @return Token
      * @throws ApiException
      */
-    public function register(): string
+    public function register(): Token
     {
         $tokenId = md5($this->token);
         $parentId = $this->parentId;
@@ -87,6 +87,6 @@ class TokenServices
             throw new ApiException($e->getCode(), $e->getMessage());
         }
 
-        return $tokenId;
+        return $token;
     }
 }

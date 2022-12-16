@@ -46,10 +46,8 @@ class PassportRepositories
         if (! $user) {
             throw new ApiException(ErrorCode::USER_NOT_EXIST);
         }
-        if ($password) {
-            if (! Hash::check($password . $user->salt, $user->getAuthPassword())) {
-                throw new ApiException(ErrorCode::PASSWORD_NOT_MATCH);
-            }
+        if (! Hash::check($password . $user->salt, $user->getAuthPassword())) {
+            throw new ApiException(ErrorCode::PASSWORD_NOT_MATCH);
         }
         DB::beginTransaction();
         try {
@@ -75,10 +73,10 @@ class PassportRepositories
     }
 
     /**
-     * @return array
+     * @return User
      * @throws ApiException
      */
-    public function register(): array
+    public function register(): User
     {
         $parameter = request()->all();
         $password = request()->input('password');
@@ -97,25 +95,13 @@ class PassportRepositories
             $user->salt = $salt;
             $user->password = bcrypt($password);
             $user->save();
-            $token = JWTAuth::fromUser($user);
-            JWTAuth::setToken($token);
-            $expire = JWTAuth::getClaim('exp');
-            $serviceDevice = new DeviceServices($user->id);
-            $deviceId = $serviceDevice->register();
-            $serviceToken = new TokenServices($user->id, $deviceId, $token, $expire);
-            $serviceToken->register();
-            $ret = [
-                'type' => 'Bearer',
-                'expire' => $expire,
-                'token' => $token,
-            ];
             DB::commit();
         } catch (\Exception $e) {
             DB::rollBack();
             throw new ApiException($e->getCode(), $e->getMessage());
         }
 
-        return $ret;
+        return $user;
     }
 
     /**

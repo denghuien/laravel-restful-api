@@ -87,60 +87,43 @@ class DeviceServices
     }
 
     /**
-     * @return string
+     * @return mixed
      * @throws ApiException
      */
-    public function register(): string
+    public function register()
     {
         $userId = $this->userId;
         $agent = new Agent();
         $browser = $agent->browser();
         $browserVersion = $agent->version($browser);
-        $deviceSystem = $agent->platform();
-        $deviceSystemVersion = $agent->version($deviceSystem);
+        $system = $agent->platform();
+        $systemVersion = $agent->version($system);
         $language = implode(',', $agent->languages());
-        $deviceName = $agent->device();
+        $name = $agent->device();
         if ($agent->isTablet()) {
-            $deviceType = 'tablet';
+            $type = 'tablet';
         } else if ($agent->isMobile()) {
-            $deviceType = 'mobile';
-            $deviceName = $this->matchMobile();
+            $type = 'mobile';
+            $name = $this->matchMobile();
         } else if ($agent->isRobot()) {
-            $deviceType = 'robot';
+            $type = 'robot';
         } else {
-            $deviceType = 'desktop';
+            $type = 'desktop';
         }
-        $deviceManufacturer = $this->getManufacturer($deviceName);
+        $manufacturer = $this->getManufacturer($name);
         $userAgent = $agent->getUserAgent();
-        $deviceId = md5($userAgent);
-        $device = Device::where(['uuid' => $deviceId])->first();
-        $userDevice = UserDevice::where(['user_id' => $userId, 'device_id' => $deviceId])->first();
+        $uuid = md5($userAgent);
         DB::beginTransaction();
         try {
-            if (! $device) {
-                $device = new Device;
-                $device->uuid = $deviceId;
-                $device->name = $deviceName;
-                $device->type = $deviceType;
-                $device->manufacturer = $deviceManufacturer;
-                $device->system = $deviceSystem;
-                $device->system_version = $deviceSystemVersion;
-                $device->language = $language;
-                $device->browser = $browser;
-                $device->browser_version = $browserVersion;
-                $device->user_agent = $userAgent;
-                $device->save();
-            }
-            if (! $userDevice) {
-                $device->user()->save(new UserDevice(['device_id' => $deviceId, 'user_id' => $userId]));
-            }
+            UserDevice::firstOrCreate(['device_id' => $uuid, 'user_id' => $userId], []);
+            $device = Device::firstOrCreate(['uuid' => $uuid], ['name' => $name, 'type' => $type, 'manufacturer' => $manufacturer, 'system' => $system, 'system_version' => $systemVersion, 'language' => $language, 'browser' => $browser, 'browser_version' => $browserVersion, 'user_agent' => $userAgent]);
             DB::commit();
         } catch (\Exception $e) {
             DB::rollBack();
             throw new ApiException($e->getCode(), $e->getMessage());
         }
 
-        return $deviceId;
+        return $device;
     }
 
     /**

@@ -28,10 +28,10 @@ class PassportController extends Controller
     }
 
     /**
-     * @return array
+     * @return \App\Models\User
      * @throws \App\Exceptions\ApiException
      */
-    public function register(): array
+    public function register(): \App\Models\User
     {
         $repositories =  new Repositories;
 
